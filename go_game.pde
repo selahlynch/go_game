@@ -13,8 +13,8 @@ void setup(){
 	size(1000, 750);
 	background(240);
 	clearBoard();
-	drawBoard();
-	
+	testInitGroup();
+	drawBoard();	
 }
 
 void draw(){
@@ -59,3 +59,84 @@ void drawStone(int xPos, int yPos, int player){
 	}
 	ellipse(boardX + xPos * boxSize, boardY + yPos * boxSize, stoneSize, stoneSize);
 }
+
+
+
+////////TODO - move this to separate Group class////////
+//depends on boardSize, board
+
+public void testInitGroup(){
+	boardSize = 5;
+	board = new int[boardSize][boardSize];
+	clearBoard();
+	board[1][2] = BLACK;
+	board[1][3] = BLACK;
+	board[2][2] = BLACK;
+	board[4][4] = BLACK;
+	initGroup(1,2,BLACK);
+	System.out.println("stones found:");
+	for (int i = 0; i<listPos; i++){
+		System.out.println(stones[i][0] + ", " + stones[i][1] );
+	}
+}
+
+
+int [][] stones;
+int listPos;
+int xMin, xMax, yMin, yMax;
+int who;
+
+//TODO - make a function that checks if the group stored in "stones" is alive
+
+public void initGroup(int xPos, int yPos, int whoInit){
+	listPos = 0;
+	stones = new int [boardSize*boardSize][2];
+	xMin = 0;
+	xMax = boardSize-1;
+	yMin = 0;
+	yMax = boardSize-1;
+	who = whoInit;
+	findGroupRecursively(xPos, yPos);
+}
+
+public void findGroupRecursively(int xPos, int yPos){
+	//System.out.println("DEBUG begin findGroupRecursively" + xPos + ", " + yPos);
+	
+	boolean checksPass = true;
+
+	//check if stone at this location is proper color
+	if(who != board[xPos][yPos]){
+		checksPass = false;
+	}
+	//System.out.println("DEBUG checks" + who + ", " + board[xPos][yPos]);
+
+
+	//check if stone is in range
+	if(xPos < xMin || xMax < xPos || yPos < yMin || yMax < yPos){
+		checksPass = false;
+	}
+	
+	//check that location is not already in list
+	for(int i = 0; i<listPos; i++){
+		if (xPos == stones[i][0] && yPos == stones[i][1]){
+			checksPass = false;
+		}
+	}
+		
+	if(checksPass){
+		//add location to list and run function on each neighboring location
+		stones[listPos][0] = xPos;
+		stones[listPos][1] = yPos;
+		listPos++;
+		findGroupRecursively(xPos+1, yPos);
+		findGroupRecursively(xPos-1, yPos);
+		findGroupRecursively(xPos, yPos+1);
+		findGroupRecursively(xPos, yPos-1);
+		
+	}
+
+}
+
+
+
+
