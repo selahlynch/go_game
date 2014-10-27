@@ -26,7 +26,16 @@ void setup(){
 }
 
 void draw() {
-	drawBoard();	
+	// draw background to clear screen
+	background(240);
+	drawBoard();
+	drawStones();
+	drawPlayerTurn();
+	// draw score
+	drawPassBtn();
+	if (gameOver) {
+		drawGameOver();
+	}
 }
 
 void clearBoard(){
@@ -38,11 +47,8 @@ void clearBoard(){
 	}	
 }
 
-void drawBoard(){
-	// draw background to clear screen
-	background(240);
-	
-	// draw the bare board
+void drawBoard() {
+	// draws the bare board
 	fill(220, 179, 92);
 	strokeWeight(2);
 	rect(boardX, boardY, boardLength, boardLength);
@@ -50,9 +56,11 @@ void drawBoard(){
 	for (int i = 0; i < boardSize; i++){
 		line(boardX + i * boxSize, boardY, boardX + i * boxSize, boardY + boardLength);
 		line(boardX, boardY + i * boxSize, boardX + boardLength, boardY + i * boxSize);
-	}
-	
-	// draw the stones
+	}	
+}
+
+void drawStones() {
+	// draws the stones currently on the board
 	for (int i = 0; i < boardSize; i++){
 		for (int j = 0; j < boardSize; j++){
 			if (board[i][j] == BLACK) {	
@@ -62,33 +70,6 @@ void drawBoard(){
 				drawStone(i, j, WHITE);	
 			}
 		}
-	}
-	
-	// draw who's turn it is
-	String player;
-	fill(0);
-	textSize(20);
-	if (currentPlayer == BLACK){
-		player = "Black";	
-	}
-	else {
-		player = "White";	
-	}
-	
-	text(player + " player's turn", playerTextX, playerTextY);
-	
-	// draw Pass button
-	fill(64, 224, 208);
-	rect(passBtnX, passBtnY, passBtnWidth, passBtnHeight);
-	fill(0);
-	textSize(24);
-	text("PASS", passBtnX + 20, passBtnY + 30);
-	
-	// draw Game Over
-	if (gameOver){
-		fill(0);
-		textSize(100);
-		text("GAME OVER", 200, 200);
 	}
 }
 
@@ -101,6 +82,36 @@ void drawStone(int xPos, int yPos, int player){
 		fill(255);
 	}
 	ellipse(boardX + xPos * boxSize, boardY + yPos * boxSize, stoneSize, stoneSize);
+}
+
+void drawPlayerTurn() {
+	// draws the text to display the current player
+	String player;
+	fill(0);
+	textSize(20);
+	if (currentPlayer == BLACK){
+		player = "Black";	
+	}
+	else {
+		player = "White";	
+	}
+	text(player + " player's turn", playerTextX, playerTextY);	
+}
+
+void drawPassBtn() {
+	// draws the pass button
+	fill(64, 224, 208);
+	rect(passBtnX, passBtnY, passBtnWidth, passBtnHeight);
+	fill(0);
+	textSize(24);
+	text("PASS", passBtnX + 20, passBtnY + 30);	
+}
+
+void drawGameOver() {
+	// draws the game over display
+	fill(0);
+	textSize(100);
+	text("GAME OVER", 200, 200);
 }
 
 void mouseClicked(){
