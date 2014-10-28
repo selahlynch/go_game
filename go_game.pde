@@ -1,9 +1,13 @@
 public int boardSize = 13;  // Number of rows/columns on the board
 public int boardX = 200;  // X position of the board (top-left corner)
 public int boardY = 100;  // Y position of the board (top-left corner)
+public color boardColor = #DCB35C;
 public int boxSize = 50;  // Number of pixels between each line on the board
-public int stoneSize = (int)(0.8 * boxSize);  // Stone size as fraction of box size
-public int boardLength = boxSize * (boardSize - 1);  // Length of the board in pixels
+public int screenWidth = boardSize * boxSize + 350;
+public int screenHeight = boardSize * boxSize + 100;
+public int bgColor = 180;
+public int stoneSize = (int)(0.8 * boxSize);  // Diameter of each stone
+public int boardLength = boxSize * (boardSize - 1);
 public int[][] board = new int[boardSize][boardSize];  // 0 - Empty, 1 - Black, 2 - White
 public static final int EMPTY = 0;
 public static final int BLACK = 1;
@@ -15,26 +19,38 @@ public int passBtnX = playerTextX - 120;  // Position of pass button
 public int passBtnY = playerTextY - 30;
 public int passBtnWidth = 100;  // Size of pass button
 public int passBtnHeight = 40;
+public int scoreX = 20;  // Position of score text
+public int scoreY = 120;
+public int blackScoreX = 20;
+public int blackScoreY = 150;
+public int whiteScoreX = 20;
+public int whiteScoreY = 180;
+public int blackScore = 0;  // Holds current score
+public int whiteScore = 0;
 public boolean passedTurn = false;  // true if last turn was passed
 public boolean gameOver = false;
+public int gameOverX = boardX;
+public int gameOverY = boardY - 5;
 
 
 void setup(){
-	size(1000, 750);
+	// Initializes the board state
+	size(screenWidth, screenHeight);
 	clearBoard();
-	drawBoard();
 }
 
 void draw() {
 	// draw background to clear screen
-	background(240);
+	background(bgColor);
 	drawBoard();
 	drawStones();
-	drawPlayerTurn();
-	// draw score
-	drawPassBtn();
+	drawScoreboard();
 	if (gameOver) {
 		drawGameOver();
+	}
+	else {
+		drawPlayerTurn();
+		drawPassBtn();
 	}
 }
 
@@ -49,7 +65,7 @@ void clearBoard(){
 
 void drawBoard() {
 	// draws the bare board
-	fill(220, 179, 92);
+	fill(boardColor);
 	strokeWeight(2);
 	rect(boardX, boardY, boardLength, boardLength);
 	strokeWeight(1);
@@ -89,6 +105,7 @@ void drawPlayerTurn() {
 	String player;
 	fill(0);
 	textSize(20);
+	textAlign(LEFT);
 	if (currentPlayer == BLACK){
 		player = "Black";	
 	}
@@ -98,20 +115,44 @@ void drawPlayerTurn() {
 	text(player + " player's turn", playerTextX, playerTextY);	
 }
 
+void drawScoreboard() {
+	// draws the scoreboard
+	textSize(20);
+	fill(0);
+	textAlign(LEFT);
+	text("Score:", scoreX, scoreY);
+	text("Black: " + blackScore, blackScoreX, blackScoreY);
+	fill(255);
+	text("White: " + whiteScore, whiteScoreX, whiteScoreY);
+}
+
 void drawPassBtn() {
 	// draws the pass button
 	fill(64, 224, 208);
 	rect(passBtnX, passBtnY, passBtnWidth, passBtnHeight);
 	fill(0);
 	textSize(24);
+	textAlign(LEFT);
 	text("PASS", passBtnX + 20, passBtnY + 30);	
 }
 
 void drawGameOver() {
 	// draws the game over display
+	String winner;
 	fill(0);
-	textSize(100);
-	text("GAME OVER", 200, 200);
+	textSize(50);
+	textAlign(CENTER);
+	text("GAME OVER", boardX + boardLength / 2, boardY - 60);
+	if (blackScore > whiteScore) {
+		winner = "Black player wins!!";
+	}
+	else if (whiteScore > blackScore) {
+		winner = "White player wins!!";
+	}
+	else {
+		winner = "It's a tie!!";	
+	}
+	text(winner, boardX + boardLength / 2, boardY - 5);
 }
 
 void mouseClicked(){
