@@ -48,8 +48,12 @@ void setup(){
 	drawBoard();
 	
 	//TODO - remove this before handing in
-	//testInitGroup();
+	test();
+}
+
+void test(){
 	testCaptureStones();
+	testGroupFunctions();
 }
 
 void draw() {
@@ -322,41 +326,70 @@ void testCaptureStones() {
 	group[4][2] = 2;
 	captureStones();
 }
-///////////////GROUP FINDING FUNCTIONS/////////////////////
-////////TODO - move this to separate Group class////////
+///////////////GROUP FUNCTIONS/////////////////////
 //depends on boardSize, board
 
-public void testInitGroup(){
+public void testGroupFunctions(){
 	boardSize = 5;
 	board = new int[boardSize][boardSize];
 	clearBoard();
+	
+	//connected group
 	board[1][2] = BLACK;
 	board[1][3] = BLACK;
 	board[2][2] = BLACK;
+
+	//disconnected piece
 	board[4][4] = BLACK;
-	initGroup(1,2,BLACK);
-	System.out.println("stones found:");
-	for (int i = 0; i<listPos; i++){
-		System.out.println(stones[i][0] + ", " + stones[i][1] );
+	
+	getGroup(1,2);
+	System.out.println("group found:");
+	for (int i = 0; i<groupSize; i++){
+		System.out.println(group[i][0] + ", " + group[i][1] );
+	}
+
+	if(isGroupAlive()){
+		System.out.println("group is alive");	
+	}
+	else{
+		System.out.println("group is dead");		
+	}
+
+	//surrounded piece
+	board[4][0] = BLACK;
+	board[3][0] = WHITE;
+	board[4][1] = WHITE;
+
+	getGroup(4,0);
+	System.out.println("group found:");
+	for (int i = 0; i<groupSize; i++){
+		System.out.println(group[i][0] + ", " + group[i][1] );
+	}
+
+	if(isGroupAlive()){
+		System.out.println("group is alive");	
+	}
+	else{
+		System.out.println("group is dead");		
 	}
 }
 
 
-int [][] stones;
-int listPos;
+int [][] group;
+int groupSize;
 int xMin, xMax, yMin, yMax;
-int who;
+int groupColor;
 
-//TODO - make a function that checks if the group stored in "stones" is alive
+//TODO - make a function that checks if the group stored in "group" is alive
 
-public void initGroup(int xPos, int yPos, int whoInit){
-	listPos = 0;
-	stones = new int [boardSize*boardSize][2];
+public void getGroup(int xPos, int yPos){
+	groupSize = 0;
+	group = new int [boardSize*boardSize][2];
 	xMin = 0;
 	xMax = boardSize-1;
 	yMin = 0;
 	yMax = boardSize-1;
-	who = whoInit;
+	groupColor = board[xPos][yPos];
 	findGroupRecursively(xPos, yPos);
 }
 
@@ -365,37 +398,59 @@ public void findGroupRecursively(int xPos, int yPos){
 	
 	boolean checksPass = true;
 
-	//check if stone at this location is proper color
-	if(who != board[xPos][yPos]){
-		checksPass = false;
-	}
-	//System.out.println("DEBUG checks" + who + ", " + board[xPos][yPos]);
-
-
 	//check if stone is in range
 	if(xPos < xMin || xMax < xPos || yPos < yMin || yMax < yPos){
 		checksPass = false;
 	}
+
+	//check if stone at this location is proper color
+	else if(groupColor != board[xPos][yPos]){
+		checksPass = false;
+	}
+	//System.out.println("DEBUG checks" + groupColor + ", " + board[xPos][yPos]);
+
+
 	
 	//check that location is not already in list
-	for(int i = 0; i<listPos; i++){
-		if (xPos == stones[i][0] && yPos == stones[i][1]){
+	for(int i = 0; i<groupSize; i++){
+		if (xPos == group[i][0] && yPos == group[i][1]){
 			checksPass = false;
 		}
 	}
 		
 	if(checksPass){
 		//add location to list and run function on each neighboring location
-		stones[listPos][0] = xPos;
-		stones[listPos][1] = yPos;
-		listPos++;
+		group[groupSize][0] = xPos;
+		group[groupSize][1] = yPos;
+		groupSize++;
 		findGroupRecursively(xPos+1, yPos);
 		findGroupRecursively(xPos-1, yPos);
 		findGroupRecursively(xPos, yPos+1);
 		findGroupRecursively(xPos, yPos-1);
 		
 	}
-
+	
 }
-///////////END GROUP FINDING FUNCTIONS//////////////////////
-
+//look at existing group, saved in class variables, determine if it is alive
+public boolean isGroupAlive(){
+	boolean hasLiberty = false;
+	for(int i = 0; i<groupSize; i++){
+		int x = group[i][0];
+		int y = group[i][1];
+		//TODO - pull this out into a function that gets surrounding stones
+		if(y+1 < yMax && board[x][y+1] == EMPTY){
+			hasLiberty = true;
+		}
+		if(y-1 > yMin && board[x][y-1] == EMPTY){
+			hasLiberty = true;
+		}
+		if(x+1 < xMax && board[x+1][y] == EMPTY){
+			hasLiberty = true;
+		}
+		if(x-1 > xMax && board[x-1][y] == EMPTY){
+			hasLiberty = true;
+		}
+	}	
+	return hasLiberty;
+}
+///////////END GROUP FUNCTIONS//////////////////////
