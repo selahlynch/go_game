@@ -40,6 +40,7 @@ public int playAgainX = winnerX + 250;
 public int playAgainY = winnerY - 40;
 public int playAgainWidth = 180;
 public int playAgainHeight = 50;
+public int hoverStoneAlpha = 150;
 
 
 void setup(){
@@ -66,6 +67,7 @@ void draw() {
 	drawBoard();
 	drawStones();
 	drawFadingStones();
+	drawHoverStone();
 	drawScoreboard();
 	if (gameOver) {
 		drawGameOver();
@@ -148,6 +150,15 @@ void drawStone(int xPos, int yPos, int player, int fadeAlpha){
 	stroke(0);
 }
 
+void drawHoverStone() {
+	if (capturedStones.length == 0) {
+		int boardPosX = getXPos(mouseX);
+		int boardPosY = getYPos(mouseY);
+		if (onBoard(boardPosX, boardPosY) && !gameOver && stonePlayAllowed(boardPosX, boardPosY)) {
+			drawStone(boardPosX, boardPosY, currentPlayer, hoverStoneAlpha);
+		}
+	}	
+}
 
 void drawPlayerTurn() {
 	// draws the text to display the current player
