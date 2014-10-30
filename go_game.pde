@@ -1,3 +1,6 @@
+import java.util.Arrays;
+
+
 int boardSize = 13;  // Number of rows/columns on the board
 public int boardX = 200;  // X position of the board (top-left corner)
 public int boardY = 100;  // Y position of the board (top-left corner)
@@ -48,12 +51,14 @@ void setup(){
 	drawBoard();
 	
 	//TODO - remove this before handing in
-	test();
+//	test();
 }
 
 void test(){
 	testCaptureStones();
 	testGroupFunctions();
+	testGetSurroundingLocations();
+	testIsValidLocation();
 }
 
 void draw() {
@@ -326,6 +331,82 @@ void testCaptureStones() {
 	group[4][2] = 2;
 	captureStones();
 }
+
+
+public void assertTrue(boolean b, String msg){
+	if(!b){
+		throw new Error(msg);		
+	}
+}
+
+public void testIsValidLocation(){
+	assertTrue(isValidLocation(new int[]{2,2}), "(2,2) is a valid location");
+	assertTrue(!isValidLocation(new int[]{-1,5}), "(-1,5) is not a valid location");
+}
+
+public boolean isValidLocation(int[] loc){
+	int x = loc[0];
+	int y = loc[1];
+	int xMin = 0;
+	int xMax = boardSize-1;
+	int yMin = 0;
+	int yMax = boardSize-1;	
+	return xMin <= x && x <= xMax && yMin <= y && y<= yMax;
+}
+
+//convert one location to a string
+public String locString(int[] loc){
+	String s = "(" + loc[0] + ", " + loc[1] + ")";
+	return s;
+}
+
+//convert a series of locations to a string
+public String locArrayString(int[][] locs){
+	String s = "" + locString(locs[0]);
+	for(int i=1; i<locs.length; i++){
+		s = s + ", " + locString(locs[i]);
+	}
+	return s;
+}
+
+public void testGetSurroundingLocations(){	
+	int[][] surroundingLocations = getSurroundingLocations(3,4);
+	assertTrue(locArrayString(surroundingLocations).equals("(4, 4), (3, 3), (2, 4)"), "surrounding locations mismatch");	
+}
+
+public int[][] getSurroundingLocations(int x, int y){
+	int[][] locs = new int[4][2];
+
+	int locCount = 0;
+	if(y+1<=yMax){
+		locs[locCount][0] = x;
+		locs[locCount][1] = y+1;
+		locCount++;
+	}
+	if(x+1<=xMax){
+		locs[locCount][0] = x+1;
+		locs[locCount][1] = y;
+		locCount++;
+	}
+	if(y-1>=xMin){
+		locs[locCount][0] = x;
+		locs[locCount][1] = y-1;
+		locCount++;
+	}
+	if(x-1>=xMin){
+		locs[locCount][0] = x-1;
+		locs[locCount][1] = y;
+		locCount++;
+	}
+
+	int[][] retVal = new int[locCount][2];
+	for(int i = 0; i<locCount; i++){
+		retVal[i] = locs[i];
+	}
+	return retVal;
+}
+
+
 ///////////////GROUP FUNCTIONS/////////////////////
 //depends on boardSize, board
 
@@ -342,47 +423,31 @@ public void testGroupFunctions(){
 	//disconnected piece
 	board[4][4] = BLACK;
 	
-	getGroup(1,2);
-	System.out.println("group found:");
-	for (int i = 0; i<groupSize; i++){
-		System.out.println(group[i][0] + ", " + group[i][1] );
-	}
-
-	if(isGroupAlive()){
-		System.out.println("group is alive");	
-	}
-	else{
-		System.out.println("group is dead");		
-	}
+	int[][] g1 = getGroup(1,2);
+	assertTrue(locArrayString(g1).equals("(1, 2), (1, 3), (2, 2)"),"group 1 is wrong");
+	assertTrue(isGroupAlive(g1),"group 1 should be alive");
 
 	//surrounded piece
 	board[4][0] = BLACK;
 	board[3][0] = WHITE;
 	board[4][1] = WHITE;
 
-	getGroup(4,0);
-	System.out.println("group found:");
-	for (int i = 0; i<groupSize; i++){
-		System.out.println(group[i][0] + ", " + group[i][1] );
-	}
-
-	if(isGroupAlive()){
-		System.out.println("group is alive");	
-	}
-	else{
-		System.out.println("group is dead");		
-	}
+	int[][] g2 = getGroup(4,0);
+	assertTrue(locArrayString(g2).equals("(4, 0)"),"group 2 is wrong");
+	assertTrue(!isGroupAlive(g2),"group 2 should be dead");
 }
 
 
 int [][] group;
 int groupSize;
+
+//TODO - remove this 
 int xMin, xMax, yMin, yMax;
 int groupColor;
 
 //TODO - make a function that checks if the group stored in "group" is alive
 
-public void getGroup(int xPos, int yPos){
+public int[][] getGroup(int xPos, int yPos){
 	groupSize = 0;
 	group = new int [boardSize*boardSize][2];
 	xMin = 0;
@@ -391,25 +456,19 @@ public void getGroup(int xPos, int yPos){
 	yMax = boardSize-1;
 	groupColor = board[xPos][yPos];
 	findGroupRecursively(xPos, yPos);
+	int[][] retVal = Arrays.copyOfRange(group, 0, groupSize);
+	return retVal;
 }
 
 public void findGroupRecursively(int xPos, int yPos){
-	//System.out.println("DEBUG begin findGroupRecursively" + xPos + ", " + yPos);
-	
+	//assume it is a valid position
+		
 	boolean checksPass = true;
 
-	//check if stone is in range
-	if(xPos < xMin || xMax < xPos || yPos < yMin || yMax < yPos){
-		checksPass = false;
-	}
-
 	//check if stone at this location is proper color
-	else if(groupColor != board[xPos][yPos]){
+	if(groupColor != board[xPos][yPos]){
 		checksPass = false;
 	}
-	//System.out.println("DEBUG checks" + groupColor + ", " + board[xPos][yPos]);
-
-
 	
 	//check that location is not already in list
 	for(int i = 0; i<groupSize; i++){
@@ -423,32 +482,29 @@ public void findGroupRecursively(int xPos, int yPos){
 		group[groupSize][0] = xPos;
 		group[groupSize][1] = yPos;
 		groupSize++;
-		findGroupRecursively(xPos+1, yPos);
-		findGroupRecursively(xPos-1, yPos);
-		findGroupRecursively(xPos, yPos+1);
-		findGroupRecursively(xPos, yPos-1);
-		
-	}
-	
+		int[][] neighbors = getSurroundingLocations(xPos, yPos);//TODO - pass an array here instead
+		for(int j = 0; j<neighbors.length; j++){
+			int xNb = neighbors[j][0];
+			int yNb = neighbors[j][1];
+			findGroupRecursively(xNb, yNb); //TODO - pass an array to this instead
+		}		
+	}	
 }
 //look at existing group, saved in class variables, determine if it is alive
-public boolean isGroupAlive(){
+public boolean isGroupAlive(int[][] group){
 	boolean hasLiberty = false;
-	for(int i = 0; i<groupSize; i++){
-		int x = group[i][0];
-		int y = group[i][1];
-		//TODO - pull this out into a function that gets surrounding stones
-		if(y+1 < yMax && board[x][y+1] == EMPTY){
-			hasLiberty = true;
-		}
-		if(y-1 > yMin && board[x][y-1] == EMPTY){
-			hasLiberty = true;
-		}
-		if(x+1 < xMax && board[x+1][y] == EMPTY){
-			hasLiberty = true;
-		}
-		if(x-1 > xMax && board[x-1][y] == EMPTY){
-			hasLiberty = true;
+	for(int i = 0; i<group.length; i++){
+		int xStart = group[i][0];
+		int yStart = group[i][1];
+		
+		int[][] sl = getSurroundingLocations(xStart, yStart);
+
+		for(int j = 0; j < sl.length; j++){
+			int x = sl[j][0];
+			int y = sl[j][1];
+			if(board[x][y] == EMPTY){
+				hasLiberty = true;
+			}
 		}
 	}	
 	return hasLiberty;
