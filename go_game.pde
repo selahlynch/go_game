@@ -287,12 +287,10 @@ void changePlayer() {
 	}
 }
 
-//TODO - fix issue that happens when you place a stone in a place with no
-//liberties, but by your placement captures stones and gives you liberties
 void checkForCaptures(int xPos, int yPos) {
 	// checks for captured groups after piece is placed at indicated location
-	int[] xList = {xPos, xPos, xPos + 1, xPos, xPos - 1};
-	int[] yList = {yPos, yPos - 1, yPos, yPos + 1, yPos};
+	int[] xList = {xPos, xPos + 1, xPos, xPos - 1, xPos};
+	int[] yList = {yPos - 1, yPos, yPos + 1, yPos, yPos};
 	int xNext, yNext;
 	for (int i = 0; i < 5; i++){
 		xNext = xList[i];
