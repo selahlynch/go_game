@@ -50,11 +50,10 @@ void setup(){
 	initGame();
 	drawBoard();
 	
-	//TODO - remove this before handing in
-	//test();
+	//runTests();
 }
 
-void test(){
+void runTests(){
 	testCaptureStones();
 	testGroupFunctions();
 	testGetSurroundingLocations();
