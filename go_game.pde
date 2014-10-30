@@ -1,7 +1,6 @@
 import java.util.Arrays;
 
-
-int boardSize = 13;  // Number of rows/columns on the board
+public int boardSize = 13;  // Number of rows/columns on the board
 public int boardX = 200;  // X position of the board (top-left corner)
 public int boardY = 100;  // Y position of the board (top-left corner)
 public color boardColor = #DCB35C;
@@ -37,7 +36,7 @@ public boolean passedTurn;  // true if last turn was passed
 public boolean gameOver;
 public int winnerX = (boardX + boardLength / 2);
 public int winnerY = boardY - 50;
-public int playAgainX = winnerX + 120;
+public int playAgainX = winnerX + 250;
 public int playAgainY = winnerY - 40;
 public int playAgainWidth = 180;
 public int playAgainHeight = 50;
@@ -51,7 +50,7 @@ void setup(){
 	drawBoard();
 	
 	//TODO - remove this before handing in
-//	test();
+	//test();
 }
 
 void test(){
@@ -78,6 +77,7 @@ void draw() {
 }
 
 void initGame(){
+	// initializes variables to start a new game
 	whiteScore = 0;
 	blackScore = 0;
 	passedTurn = false;
@@ -121,6 +121,7 @@ void drawStones() {
 }
 
 void drawFadingStones() {
+	// draws stones that have been captured using a fading effect
 	int fade = (int) (255 * (1.0 - (millis() - savedTime) / stoneFadeTime));
 	if (fade <= 0) {
 		capturedStones = new int[0][0];
@@ -214,11 +215,11 @@ void mouseClicked(){
 	if (capturedStones.length == 0) {
 		int xBoardPos = getXPos(mouseX);
 		int yBoardPos = getYPos(mouseY);
-		if (clickedOnBoard(xBoardPos, yBoardPos) && !gameOver) {
+		if (onBoard(xBoardPos, yBoardPos) && !gameOver) {
 			if (stonePlayAllowed(xBoardPos, yBoardPos)) {
 				board[xBoardPos][yBoardPos] = currentPlayer;
 				passedTurn = false;
-				// check for captures
+				checkForCaptures(xBoardPos, yBoardPos);
 				changePlayer();
 			}
 		}
@@ -245,7 +246,7 @@ boolean clickedPass(int clickX, int clickY) {
 			&& (clickY >= passBtnY) && (clickY <= passBtnY + passBtnHeight);
 }
 
-boolean clickedOnBoard(int xPos, int yPos) {
+boolean onBoard(int xPos, int yPos) {
 	// returns true if xPos, yPos is a valid position on the board
 	return (xPos >= 0) && (xPos <= (boardSize - 1)) && (yPos >= 0) && (yPos <= (boardSize - 1));	
 }
@@ -286,8 +287,26 @@ void changePlayer() {
 	}
 }
 
+void checkForCaptures(int xPos, int yPos) {
+	// checks for captured groups after piece is placed at indicated location
+	int[] xList = {xPos, xPos, xPos + 1, xPos, xPos - 1};
+	int[] yList = {yPos, yPos - 1, yPos, yPos + 1, yPos};
+	int xNext, yNext;
+	for (int i = 0; i < 5; i++){
+		xNext = xList[i];
+		yNext = yList[i];
+		if (onBoard(xNext, yNext)) {
+			getGroup(xNext, yNext);
+			if (!isGroupAlive()){
+				captureStones();	
+			}
+		}
+	}
+}
+
 void captureStones() {
-	int numStones = group.length;
+	// Removes captured stones from the board and scores them appropriately
+	int numStones = groupSize;
 	int player = groupColor;
 	int stoneX, stoneY;
 	capturedStones = new int[numStones][3];
@@ -309,26 +328,22 @@ void captureStones() {
 }
 
 void removeStone(int xPos, int yPos){
+	// Empties the indicated board position
 	board[xPos][yPos] = EMPTY;	
 }
 
 void testCaptureStones() {
-	group = new int[5][3];
+	group = new int[5][2];
 	group[0][0] = 9;
 	group[0][1] = 2;
-	group[0][2] = 1;
 	group[1][0] = 2;
 	group[1][1] = 3;
-	group[1][2] = 1;
 	group[2][0] = 3;
 	group[2][1] = 2;
-	group[2][2] = 1;
 	group[3][0] = 3;
 	group[3][1] = 3;
-	group[3][2] = 1;
 	group[4][0] = 5;
 	group[4][1] = 5;
-	group[4][2] = 2;
 	captureStones();
 }
 
