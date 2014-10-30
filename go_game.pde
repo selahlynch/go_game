@@ -287,6 +287,8 @@ void changePlayer() {
 	}
 }
 
+//TODO - fix issue that happens when you place a stone in a place with no
+//liberties, but by your placement captures stones and gives you liberties
 void checkForCaptures(int xPos, int yPos) {
 	// checks for captured groups after piece is placed at indicated location
 	int[] xList = {xPos, xPos, xPos + 1, xPos, xPos - 1};
@@ -296,8 +298,8 @@ void checkForCaptures(int xPos, int yPos) {
 		xNext = xList[i];
 		yNext = yList[i];
 		if (onBoard(xNext, yNext)) {
-			getGroup(xNext, yNext);
-			if (!isGroupAlive()){
+			int[][] g = getGroup(xNext, yNext);
+			if (!isGroupAlive(g)){
 				captureStones();	
 			}
 		}
@@ -470,7 +472,9 @@ public int[][] getGroup(int xPos, int yPos){
 	yMin = 0;
 	yMax = boardSize-1;
 	groupColor = board[xPos][yPos];
-	findGroupRecursively(xPos, yPos);
+	if (groupColor != EMPTY){
+		findGroupRecursively(xPos, yPos);
+	}
 	int[][] retVal = Arrays.copyOfRange(group, 0, groupSize);
 	return retVal;
 }
